@@ -339,4 +339,6 @@ int main(void)
     // reversing the list
     reverse_list(&head);
     print_list(&head);
+
+    free(head);
 }
