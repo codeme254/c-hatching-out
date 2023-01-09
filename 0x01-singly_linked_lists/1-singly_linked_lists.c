@@ -1,344 +1,320 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
-/**
- * List_Node - Structure of a node in the list
- * @value : value of a node in the list
- * @next : pointer to the next node of type List_Node
-*/
-typedef struct List_Node{
-    int value;
-    struct List_Node *next;
-} List_Node;
+/*
+ * ListNode - structure of a ListNode
+ * @value: the value of a node
+ * @next: pointer to the next element in the list
+ */
 
-
-/**
- * add_to_end - function that adds an element at the end of the list
- * @head : the head of the singly linked list
- * @value : value of the node that is supposed to be added to the list
- * Return : the added node
-*/
-List_Node insert_to_end(List_Node **head, int value)
+typedef struct ListNode
 {
-    // allocate memory for this new node
-    List_Node *new_node = malloc(sizeof(List_Node));
-    // check if the memory has been allocated and exit if not
-    if (new_node == NULL){
-        exit(1);
-    }
-    // set the values for the list node
-    new_node->value = value;
-    new_node->next = NULL;
-    // if there is no head in the singly linked list, make this node the head
-    if (*head == NULL){
-        *head = new_node;
-        return *new_node;
-    }
-    // otherwise, loop to the end and add this node there
-    List_Node *current = *head;
-    while (current->next != NULL){
-        current = current->next;
-    }
-    current->next = new_node;
-    return *new_node;
+	int value;
+	struct ListNode *next;
+} ListNode;
+
+/*
+ * INITIALIZE_NODE: initializes the node of a singly linked list
+ * @node_value: value of the node to be initialized by this function
+ * Return: pointer to the created node or NULL on failure
+ */
+ListNode *INITIALIZE_NODE(int node_value)
+{
+	ListNode *new_node = malloc(sizeof(ListNode));
+	if (new_node == NULL)
+		return (NULL);
+	new_node->value = node_value;
+	new_node->next = NULL;
+	return (new_node);
 }
 
-/**
- * insert_at_beginning - inserts a node at the beginning of a list
- * @head : the head of the singly linked list
- * @value : the value of the node that is supposed to be added to the list
-*/
-List_Node insert_at_beginning(List_Node **head, int value){
-    List_Node *new_node = malloc(sizeof(List_Node));
+/*
+ * append_node_to_list - appends a node to a given list
+ * @head: pointer to the first node of the list we are appending to
+ * @new_node_value: the value of the new node appended to the list
+ * Return: the node that was appended to the list or NULL on failure
+ */
+ListNode *append_node_to_list(ListNode **head, int new_node_value)
+{
+	ListNode *new_node = INITIALIZE_NODE(new_node_value);
+	if (new_node == NULL)
+		return (NULL);
 
-    if (new_node == NULL){
-        exit(1);
-    }
-    new_node->value = value;
-    new_node->next = NULL;
-    // if there are completely no elements in the list, make this node the head
-    if (*head == NULL){
-        *head = new_node;
-        return *new_node;
-    }
-    // if there are elements in the list
-    // make this node point to the current head
-    // explicitly make it to be the head
-    new_node->next = *head;
-    *head = new_node;
-    return *new_node;
+	/*If the list is empty, this node should become the head*/
+	if (*head == NULL)
+	{
+		*head = new_node;
+		return (new_node);
+	}
+	/*Otherwise, loop to the end of the list and add this node there*/
+	ListNode *current = *head;
+	while (current->next != NULL)
+		current = current->next;
+	current->next = new_node;
+	return (new_node);
 }
 
-/**
- * get_list_length - gets the length of the singly linked list
- * @head : the head of the singly linked list
- * Return : the length of the list
-*/
-int get_list_length(List_Node **head){
-    // if there are no elements, return 0
-    if (*head == NULL){
-        return (0);
-    }
+/*
+ * prepend_node_to_list - adds a new node at start of a singly linked list
+ * @new_node_value: value of the new node being prepended
+ * Return: pointer to the created node or NULL on failure
+ */
+ListNode *prepend_node_to_list(ListNode **head, int new_node_value)
+{
+	ListNode *new_node = INITIALIZE_NODE(new_node_value);
 
-    // otherwise, loop as you count
-    List_Node *current = *head;
-    int length;
-
-    length = 0;
-
-    while (current != NULL)
-    {
-        length++;
-        current = current->next;
-    }
-    return length;
-    
+	if (new_node == NULL)
+		return (NULL);
+	/*if the list is empty, the new node becomes the head and tail*/
+	if (*head == NULL)
+	{
+		*head = new_node;
+		return (new_node);
+	}
+	/*Otherwise, make the new node point to the current head*/
+	/*Then make the new node to be the new head of the list*/
+	new_node->next = *head;
+	*head = new_node;
+	return (new_node);
 }
 
-/**
- * get - gets the node at a given index in the list
- * @head : pointer to the head of the singly linked list
- * @idx : the index of the node that we are supposed to get
- * Return : the node at index @idx following the zero indexing
-*/
-List_Node *get(List_Node **head, int idx){
-    // if there are no nodes in the list, return NULL
-    if (*head == NULL){
-        return NULL;
-    }
-    // idx should be greater than 0 and less than list length, validate this
-    int list_length = get_list_length(head);
-    if (idx <0 && idx >= list_length){
-        return (NULL);
-    }
-    // if the idx is 0, just return the head
-    if (idx == 0){
-        return *head;
-    }
-    // otherwise, loop until you get the element
-    List_Node *current = *head;
-    int i = 0;
-    while (i < idx)
-    {
-        i++;
-        current = current->next;
-    }
-    return current;
+
+/*
+ * remove_at_end - removes a node at the end of a singly linked list
+ * @head: pointer to the head of the list we are removing at
+ * Return: ponter to the removed node or NULL if the list is empty
+ */
+ListNode *remove_at_end(ListNode **head)
+{
+	if (*head == NULL)
+		return (NULL);
+	/*Use two pointers algorithm to remove the last node*/
+	ListNode *tmp_node = *head;
+	ListNode *current = *head;
+	while (current->next != NULL)
+	{
+		tmp_node = current;
+		current = current->next;
+	}
+	tmp_node->next = NULL;
+	/*Also check if there is one element remaining*/
+	/*If so, we make the head point to null i.e making the list empty*/
+	/*We know one element is reamining when tmp_node pointer and head
+	 * pointer are both pointing to the same thing*/
+	if (tmp_node == *head)
+		*head = NULL;
+	return (current);
 }
 
-/**
- * insert_middle - inserts a node in the middle of a list at a given index
- * @head : pointer to the head of a singly linked list
- * @value : value of the new node that is supposed to be added
- * @idx : index at which to insert the new node
- * Return : the added node
- * Description: the method follows zero based indexing
-*/
-List_Node insert_middle(List_Node **head, int value, int idx){
-    // if the index is zero, we insert at the beginning
-    if (idx == 0){
-        return (insert_at_beginning(head, value));
-    }
+/*
+ * remove_at_beginning - removes a node at the start of a singly linked list
+ * @head: pointer to the first node of the list we are removing a node
+ * Return: pointer to the removed node or NULL if the list is empty
+ */
+ListNode *remove_at_beginning(ListNode **head)
+{
+	if (*head == NULL)
+		return (NULL);
+	ListNode *current_head = *head;
 
-    // if idx is equal to length of list - 1, we add it to the end
-    int list_length = get_list_length(head);
-    if (idx == list_length-1){
-        return (insert_to_end(head, value));
-    }
-
-    // allocate memory for this new node
-    List_Node *new_node = malloc(sizeof(List_Node));
-    if (new_node == NULL){
-        exit(1);
-    }
-    new_node->value = value;
-    new_node->next = NULL;
-
-    // we use get to get the node just before the index we want to insert
-    List_Node *node_before = get(head, idx - 1);
-    // get what node before is currently pointing to
-    List_Node *tmp = node_before->next;
-    // insert in the middle of the node before and tmp
-    node_before->next = new_node;
-    new_node->next = tmp;
-    return *new_node;
+        /*Checking if only one element is remaining*/
+	if (current_head->next == NULL)
+	{
+		*head = NULL;
+		return (current_head);
+	}
+	*head = current_head->next;
+	current_head->next = NULL;
+	return (current_head);
 }
 
-/**
- * remove_end - removes a node at the end of the list
- * @head : pointer to the head of the singly linked list
- * Return: the removed node
-*/
-List_Node *remove_end(List_Node **head){
-    // if there are no elements in the list, return NULL
-    if (*head == NULL){
-        return (NULL);
-    }
+/*
+ * get_list_length - gets the length of a singly linked list
+ * @head: pointer to the first node of the list we are getting the length
+ * Return: the length of the list or zero if the list is empty
+ */
+int get_list_length(ListNode **head)
+{
+	int length_of_list;
+	length_of_list = 0;
+	if (*head == NULL)
+		return (length_of_list);
 
-    // Get the list length
-    int list_length = get_list_length(head);
-    // get the last node so that we return it at the end
-    // tap into power of list_length - 1 and the get function
-    List_Node *last_node = get(head, list_length - 1);
-    //use get to get second last node and set it's next property to be null
-    List_Node *second_last_node = get(head, list_length-2);
-    second_last_node->next = NULL;
-    // free the removed node
-    free(last_node);
-    return (last_node);
+	ListNode *current_node = *head;
+	while (current_node != NULL)
+	{
+		current_node = current_node->next;
+		++length_of_list;
+	}
+	return (length_of_list);
 }
 
-/**
- * remove_beginning : removes a node at the beginning of the list
- * @head : pointer to the head of the singly linked list
- * Return : the removed node
-*/
+/*
+ * get_node - retrieves a node from a list using zero indexing
+ * @head: pointer to the first node of the list we are getting from
+ * @node_index: the index of the node to be retrieved
+ * Return: the retrieved node or NULL on failure
+ */
+ListNode *get_node(ListNode **head, int node_index)
+{
+	/*If the list is empty, we return null*/
+	if (*head == NULL)
+		return (NULL);
 
-List_Node *remove_beginning(List_Node **head){
-    // if there are no elements in the list, return NULL
-    if (*head == NULL){
-        return (NULL);
-    }
-    // otherwise, get the current head
-    List_Node *current_head = *head;
-    // make the head to be the next of the current head
-    *head = current_head->next;
-    // make the current head's next to be null and free it
-    current_head->next = NULL;
-    free(current_head);
-    return (current_head);
+	/*If the given index is greater than length of list, return null*/
+	/*And if it is also less than zero, return null*/
+	int list_length = get_list_length(head);
+	if (node_index >= list_length || node_index < 0)
+	{ printf("bad index\n");
+		return (NULL);
+	}
+
+	int current_index = 0;
+	ListNode *current_node = *head;
+	while (current_index != node_index)
+	{
+		current_node = current_node->next;
+		++current_index;
+	}
+	return (current_node);
 }
 
-/**
- * remove_middle - removes a node in the middle of the list
- * @head : the head of the singly linked list
- * @idx : the index of the node to be removed
- * Return: the removed node
-*/
+/*
+ * change_node_value - changes the value of a given node in the list
+ * @head: pointer to the first node of the list where this node is
+ * @new_value: the new value for the node
+ * @node_index: the index of the node to change
+ * Return: the altered node or NULL on failure
+ */
+ListNode *change_node_value(ListNode **head, int new_value, int node_index)
+{
+	if (*head == NULL)
+		return (NULL);
+	ListNode *node_to_change = get_node(head, node_index);
+	if (node_to_change == NULL)
+		return (NULL);
 
-List_Node *remove_middle(List_Node **head, int idx){
-    // if the list is empty, return null
-    if (*head == NULL){
-        return NULL;
-    }
-    // if the indexis zero, we call the function that removes the head
-    if (idx == 0){
-        return (remove_beginning(head));
-    }
-    // if the index is equal to length of the list minus 1, we remove at end
-    int list_length = get_list_length(head);
-    if (idx == list_length-1){
-        return (remove_end(head));
-    }
-
-    // otherwise, use get to get the node before the node to be removed
-    List_Node *node_before = get(head, idx-1);
-    // use get to get the node to be removed
-    List_Node *removed_node = get(head, idx);
-    // make this node before next point to removed node next
-    node_before->next = removed_node->next;
-    // make the removed node next to be null then free and return it
-    removed_node->next = NULL;
-    free(removed_node);
-    return (removed_node);
+	node_to_change->value = new_value;
+	return (node_to_change);
 }
 
-/**
- * set - changes the value of a node in the list
- * @head : the head of the singly linked list
- * @idx : the index of the node being changed
-*/
-List_Node *set(List_Node **head, int value, int idx){
-    // use get to get the node that should be changed
-    // it already handles the idx validation
-    List_Node *node_to_be_changed = get(head, idx);
-    node_to_be_changed->value = value;
-    return node_to_be_changed;
+/*
+ * insert_in_the_middle - inserts a node in the middle of the list
+ * @head: pointer to the first node of the list to insert into
+ * @node_value: the value of the new node to be inserted
+ * @index: the index of insertion
+ * Return: the inserted node or NULL on failure
+ */
+ListNode *insert_in_the_middle(ListNode **head, int node_value, int index)
+{
+	/*Check if the index is within the ranges*/
+	int list_length = get_list_length(head);
+	if (index < 0 || index >= list_length)
+		return (NULL);
+
+	/*If the index is zero, we insert at the beggining*/
+	if (index == 0)
+		return(prepend_node_to_list(head, node_value));
+
+	ListNode *new_node = INITIALIZE_NODE(node_value);
+	if (new_node == NULL)
+		return (NULL);
+	/*We use get_node to get the node at index - 1*/
+	/*Then make all the possible connections*/
+	ListNode *temp_node = get_node(head, index - 1);
+	ListNode *temp_node_next = temp_node->next;
+
+	temp_node->next = new_node;
+	new_node->next = temp_node_next;
+
+	return (new_node);
 }
 
-/**
- * reverse_list - reverses the list in place
- * @head : the head of the singly linked list
- * Return: the head of the singly linked list
-*/
+/*
+ * remove_from_the_middle - removes a node from the middle of a list
+ * @head: pointer to the first element of the list we are removing from
+ * @removal_index: the index of the node we want to remove
+ * Return: the removed node or null on failure
+ */
+ListNode *remove_from_the_middle(ListNode **head, int removal_index)
+{
+	/*If the list is empty, return NULL*/
+	if (*head == NULL)
+		return (NULL);
+	/*Check if the removal index is within range*/
+	int list_length = get_list_length(head);
+	if (removal_index < 0 || removal_index >= list_length)
+		return (NULL);
 
-List_Node *reverse_list(List_Node **head){
-    // if there are no elements, return null
-    if (*head == NULL){
-        return (NULL);
-    }
-    List_Node *previous = NULL;
-    List_Node *current = *head;
-    List_Node *next = current->next;
-    while(current->next != NULL){
-        current->next = previous;
-        previous = current;
-        current = next;
-        next = current->next;
-    }
-    current->next = previous;
-    *head = current;
-    return (*head);
+	/*If the removal index is zero, we remove at beginning*/
+	if (removal_index == 0)
+		return(remove_at_beginning(head));
+
+	/*if removal index is equal to length of list minus 1, remove at end*/
+	if (removal_index == list_length - 1)
+		return(remove_at_end(head));
+
+	/*Otherwise, get the node at removal index minus 1 and index plus 1
+	 * and then change the connections approriately*/
+	ListNode *node_before = get_node(head, removal_index - 1);
+	ListNode *node_after = get_node(head, removal_index + 1);
+	ListNode *removed_node = get_node(head, removal_index);
+	node_before->next = node_after;
+	removed_node->next = NULL;
+	return (removed_node);
 }
 
-/**
- * print_list - prints the singly linked list
- * @head : the head of the singly linked list
-*/
 
-void print_list (List_Node **head){
-    List_Node *current = *head;
-    while (current != NULL){
-        printf("%d->", current->value);
-        current = current->next;
-    }
-    printf("NULL\n");
+/*
+ * traverse_list - goes through each node in the singly linked list
+ * @head: pointer to the first node of the list to traverse
+ */
+void traverse_list(ListNode **head)
+{
+	if (*head == NULL)
+		printf("There are no nodes to traverse\n");
+	ListNode *current = *head;
+	while (current != NULL)
+	{
+		printf("%d -> ", current->value);
+		current = current->next;
+	}
+	printf("NULL\n");
 }
 
 int main(void)
 {
-    // initializing the singly linked list
-    List_Node *head = NULL;
-    insert_to_end(&head, 10);
-    insert_to_end(&head, 15);
-    insert_to_end(&head, 20);
+	printf("===SINGLY LINKED LISTS===\n");
+	ListNode *head = NULL;
+	append_node_to_list(&head, 10);
+	append_node_to_list(&head, 20);
+	append_node_to_list(&head, 30);
+	append_node_to_list(&head, 40);
 
-    // inserting at the beginning
-    insert_at_beginning(&head, 5);
-    insert_at_beginning(&head, 4);
-    insert_at_beginning(&head, 3);
+	prepend_node_to_list(&head, 5);
+	prepend_node_to_list(&head, 3);
+	prepend_node_to_list(&head, 2);
+	prepend_node_to_list(&head, 0);
+       
+	remove_at_end(&head);
+	remove_at_end(&head);
 
-    // getting a node
-    printf("%d\n", get(&head, 3)->value);
+	remove_at_beginning(&head);
+	remove_at_beginning(&head);
+	remove_at_beginning(&head);
 
-    // inserting in the middle
-    insert_middle(&head, 8, 3);
-    insert_middle(&head, 1, 0);
-    insert_middle(&head, 25, 7);
+	ListNode *node = get_node(&head, 1);
 
-    // removing at the end
-    remove_end(&head);
+	insert_in_the_middle(&head, 3, 0);
+	insert_in_the_middle(&head, 4, 1);
+	insert_in_the_middle(&head, 15, 4);
 
-    // removing at the beginning
-    remove_beginning(&head);
+	remove_from_the_middle(&head, 3);
 
-    // removing in the middle
-    remove_middle(&head, 0);
-    remove_middle(&head, 5);
-    remove_middle(&head, 2);
+	change_node_value(&head, 10, 2);
 
-    // changing the value of a node
-    set(&head, 2, 0);
-
-    // getting the length of the list
-    printf("Length of the list: %d\n", get_list_length(&head));
-
-    // printing/traversing the list
-    print_list(&head);
-    
-    // reversing the list
-    reverse_list(&head);
-    print_list(&head);
-
-    free(head);
+	traverse_list(&head);
+	printf("Length of the list %d\n", get_list_length(&head));
+	return (0);
 }
